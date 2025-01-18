@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dicionário gRPC</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px #d84d78;
+        }
+
+        h1 {
+            color: #d84d78;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            color: #d84d78;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #d84d78;;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #ffcbdb;
+            color: #d84d78;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ffcbdb;
+        }
+
+        .dictionary-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            color: #d84d78;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #ffcbdb;
+            color: #d84d78;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message {
+            color: #28a745;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dicionário gRPC</h1>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="wordInput" placeholder="Digite uma palavra">
+                <button onclick="addWord()">Adicionar</button>
+            </div>
+            <div id="errorMsg" class="error-message"></div>
+            <div id="successMsg" class="success-message"></div>
+        </div>
+
+        <div class="dictionary-section">
+            <div class="input-group">
+                <h2>Palavras Registradas</h2>
+                <button onclick="refreshDictionary()">Atualizar Lista</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Palavra</th>
+                        <th>Contagem</th>
+                    </tr>
+                </thead>
+                <tbody id="dictionaryBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        // Função para mostrar mensagem de erro
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Função para mostrar mensagem de sucesso
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMsg');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Função para adicionar palavra
+        async function addWord() {
+            const wordInput = document.getElementById('wordInput');
+            const word = wordInput.value.trim();
+
+            if (!word) {
+                showError('Por favor, digite uma palavra');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/add-word`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ word }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess(`Palavra "${word}" adicionada com sucesso!`);
+                    wordInput.value = '';
+                    refreshDictionary();
+                } else {
+                    showError(data.detail || 'Erro ao adicionar palavra');
+                }
+            } catch (error) {
+                showError('Erro de conexão com o servidor');
+            }
+        }
+
+        // Função para atualizar o dicionário
+        async function refreshDictionary() {
+            try {
+                const response = await fetch(`${API_URL}/dictionary`);
+                const data = await response.json();
+
+                const tbody = document.getElementById('dictionaryBody');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    const row = tbody.insertRow();
+                    const cell = row.insertCell();
+                    cell.colSpan = 2;
+                    cell.textContent = 'Nenhuma palavra registrada';
+                    cell.style.textAlign = 'center';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).textContent = item.word;
+                    row.insertCell(1).textContent = item.count;
+                });
+            } catch (error) {
+                showError('Erro ao carregar dicionário');
+            }
+        }
+
+        // Adiciona evento de tecla Enter no input
+        document.getElementById('wordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addWord();
+            }
+        });
+
+        // Carrega o dicionário quando a página é aberta
+        refreshDictionary();
+    </script>
+</body>
+</html>

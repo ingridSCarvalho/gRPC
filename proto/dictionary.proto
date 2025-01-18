@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package dictionary;
+
+// Definição da mensagem para uma palavra e sua contagem
+message WordCount {
+    string word = 1;
+    int32 count = 2;
+}
+
+// Request para adicionar uma palavra
+message WordRequest {
+    string word = 1;
+}
+
+// Response para a adição de palavra
+message WordResponse {
+    int32 count = 1;  // Contagem atual da palavra
+}
+
+// Request vazio para solicitar o dicionário
+message EmptyRequest {}
+
+// Response contendo todo o dicionário
+message DictionaryResponse {
+    repeated WordCount words = 1;  // Lista de palavras e suas contagens
+}
+
+// Serviço do dicionário
+service DictionaryService {
+    rpc AddWord(WordRequest) returns (WordResponse) {}
+    rpc PrintDictionary(EmptyRequest) returns (DictionaryResponse) {}
+}
