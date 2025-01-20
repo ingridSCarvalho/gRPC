@@ -146,7 +146,7 @@
     <script>
         const API_URL = 'http://localhost:5000';
 
-        // Função para mostrar mensagem de erro
+        
         function showError(message) {
             const errorDiv = document.getElementById('errorMsg');
             errorDiv.textContent = message;
@@ -156,7 +156,7 @@
             }, 3000);
         }
 
-        // Função para mostrar mensagem de sucesso
+        
         function showSuccess(message) {
             const successDiv = document.getElementById('successMsg');
             successDiv.textContent = message;
@@ -166,7 +166,7 @@
             }, 3000);
         }
 
-        // Função para adicionar palavra
+       
         async function addWord() {
             const wordInput = document.getElementById('wordInput');
             const word = wordInput.value.trim();
@@ -199,7 +199,7 @@
             }
         }
 
-        // Função para atualizar o dicionário
+        
         async function refreshDictionary() {
             try {
                 const response = await fetch(`${API_URL}/dictionary`);
@@ -227,14 +227,13 @@
             }
         }
 
-        // Adiciona evento de tecla Enter no input
+       
         document.getElementById('wordInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 addWord();
             }
         });
 
-        // Carrega o dicionário quando a página é aberta
         refreshDictionary();
     </script>
 </body>
