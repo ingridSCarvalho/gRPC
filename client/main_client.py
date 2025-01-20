@@ -3,10 +3,9 @@ import dictionary_pb2
 import dictionary_pb2_grpc
 
 def run_client():
-    # Criar um canal gRPC
     channel = grpc.insecure_channel('localhost:50051')
     
-    # Criar um stub (cliente)
+   
     stub = dictionary_pb2_grpc.DictionaryServiceStub(channel)
     
     while True:
@@ -19,11 +18,11 @@ def run_client():
                 if word.lower() == 'sair':
                     break
                     
-                # Criar a requisição
+                
                 request = dictionary_pb2.WordRequest(word=word)
                 
                 try:
-                    # Fazer a chamada ao servidor
+            
                     response = stub.AddWord(request)
                     print(f"Palavra '{word}' adicionada/atualizada. Contagem atual: {response.count}")
                 except grpc.RpcError as e:
@@ -31,10 +30,10 @@ def run_client():
                     
         elif modo == '2':
             try:
-                # Criar uma requisição vazia para consulta
+               
                 request = dictionary_pb2.EmptyRequest()
                 
-                # Fazer a chamada ao servidor
+        
                 response = stub.PrintDictionary(request)
                 
                 print("\nDicionário atual:")
