@@ -8,20 +8,20 @@ from typing import List
 
 app = FastAPI(title="Dicionário API")
 
-# Configurar CORS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Em produção, especifique os domínios permitidos
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Criar o canal gRPC
+
 channel = grpc.insecure_channel('localhost:50051')
 stub = dictionary_pb2_grpc.DictionaryServiceStub(channel)
 
-# Models Pydantic para validação de dados
+
 class WordRequest(BaseModel):
     word: str
 
@@ -35,7 +35,7 @@ class WordCount(BaseModel):
 @app.post("/add-word", response_model=WordResponse)
 async def add_word(request: WordRequest):
     try:
-        # Criar requisição gRPC
+       
         grpc_request = dictionary_pb2.WordRequest(word=request.word)
         response = stub.AddWord(grpc_request)
         return {"count": response.count}
@@ -54,7 +54,7 @@ async def get_dictionary():
     except grpc.RpcError as e:
         raise HTTPException(status_code=400, detail=str(e.details()))
 
-# Rota para verificar status da API
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
